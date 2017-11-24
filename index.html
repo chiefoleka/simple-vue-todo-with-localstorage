@@ -31,7 +31,7 @@
 	.complete {
 		text-decoration: line-through;
 	}
-	ol {
+	li {
 		list-style-type: none;
 	}
 	ol li {
@@ -82,12 +82,12 @@
 		<div class="todo">
 		  	<label class="center-text">Todos: <input type="text" v-model="newTasks" @keyup.enter="addTask" style="width: 250px; margin-left: 20px " placeholder="What do you need to do?"><input type="button" class="clear-all" value="Clear All" style="float: right" @click="clearAll"></label> 
 			<hr />
-			<ol>
-	    		<li v-for="(todo,index) in tasks" class="task">
+			<draggable v-model="tasks" @change="updateList">
+	    		<li v-for="(todo,index) in tasks" class="task" :key="index">
 		      		<input type="checkbox" v-model="todo.completed" @click="complete(todo)"> <span v-bind:class="{complete: todo.completed}">{{index+1}}. {{ todo.task }}</span> <button @click="removeTask(todo)" class="close">x</button>
 		   		</li>
-		  	</ol>
-		  	</div>
+		  	</draggable>
+		</div>
 		<div class="notes">
 			<label class="center-text">Note</label>
 			<hr />
@@ -98,6 +98,8 @@
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.3/vue.js"></script>
 <script src="https://cdn.rawgit.com/FranzSkuffka/vue-medium-editor/0.1.0/dist/vueMediumEditor.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.6.0/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/15.0.0/vuedraggable.min.js"></script>
 <script type="text/javascript">
 	options = {
       toolbar: {buttons: ['bold', 'italic', 'underline', 'strikethrough', 'h1', 'h2', 'h3', 'quote', 'unorderedlist']},
@@ -113,7 +115,7 @@
 	    	temp : ""
 	  	},
 	  	components: {
-		    'medium-editor': vueMediumEditor.default
+		    'medium-editor': vueMediumEditor.default,
 		},
 	  	methods : {
 	  		init(){
@@ -134,7 +136,6 @@
 				if(notes !== null) {
 					this.notes = notes
 				}
-				console.log(this.tasks)
 	  		},
 	  		addTask : function(){
 	  			var blob = {
@@ -149,6 +150,9 @@
 	  			var task = localStorage.getObj('tasks')
 	  			task[this.tasks.indexOf(todo)].completed = !task[this.tasks.indexOf(todo)].completed
 	  			localStorage.setObj('tasks', task)
+	  		},
+	  		updateList : function(){
+	  			localStorage.setObj('tasks', this.tasks)
 	  		},
 	  		clearAll : function(){
 	  			var result = confirm(`Are you sure you want to delete all todos?`) 
